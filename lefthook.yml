@@ -1,0 +1,18 @@
+glob_matcher: doublestar
+
+pre-commit:
+  jobs:
+    - name: perltidy
+      glob: "**/*.{pl,pm,t}"
+      run: mise exec -- perltidy --profile=.perltidyrc -b -bext=/ {staged_files}
+      stage_fixed: true
+
+    - name: oxfmt
+      glob: "**/*.{md,json,jsonc,yml,yaml,toml,css,js,mjs}"
+      run: mise exec -- bunx --bun oxfmt --write --no-error-on-unmatched-pattern {staged_files}
+      stage_fixed: true
+
+pre-push:
+  jobs:
+    - name: check
+      run: mise run check

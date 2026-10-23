@@ -1,0 +1,43 @@
+name: fil
+
+services:
+  miniflux:
+    image: miniflux/miniflux:2.3.4
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:${MINIFLUX_PORT:-8080}:8080
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://miniflux:miniflux@db/miniflux?sslmode=disable
+      RUN_MIGRATIONS: 1
+      BASE_URL: http://127.0.0.1:${MINIFLUX_PORT:-8080}/
+      # Fil::Miniflux signs in as this admin
+      CREATE_ADMIN: 1
+      ADMIN_USERNAME: ${MINIFLUX_USERNAME:-admin}
+      ADMIN_PASSWORD: ${MINIFLUX_PASSWORD:-miniflux}
+    healthcheck:
+      test: ["CMD", "/usr/bin/miniflux", "-healthcheck", "auto"]
+      interval: 10s
+      start_interval: 2s
+      start_period: 30s
+
+  db:
+    image: postgres:18.6
+    restart: unless-stopped
+    # No published port, so the password only guards the compose network
+    environment:
+      POSTGRES_USER: miniflux
+      POSTGRES_PASSWORD: miniflux
+      POSTGRES_DB: miniflux
+    volumes:
+      - db:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "miniflux"]
+      interval: 10s
+      start_interval: 2s
+      start_period: 30s
+
+volumes:
+  db:

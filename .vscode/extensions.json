@@ -1,0 +1,13 @@
+{
+  "recommendations": [
+    "bscan.perlnavigator",
+    "kraih.mojolicious",
+    "hverlin.mise-vscode",
+    "EditorConfig.EditorConfig",
+    "redhat.vscode-yaml",
+    "stylelint.vscode-stylelint",
+    "oxc.oxc-vscode",
+    "tamasfe.even-better-toml",
+    "ms-vscode-remote.remote-containers"
+  ]
+}

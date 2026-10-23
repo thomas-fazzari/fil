@@ -1,0 +1,86 @@
+min_version = "2026.9.0"
+
+[tools]
+perl = "5.44.0.0"
+bun = "1.4.3"
+lefthook = "2.2.2"
+
+[env]
+PERL5LIB = "{{config_root}}/local/lib/perl5"
+_.path = ["{{config_root}}/local/bin"]
+
+[tasks.install]
+description = "Installs the Perl and Bun dependencies"
+run = [
+  "cpanm --notest --quiet --local-lib-contained local --with-develop --installdeps .",
+  "bun install --frozen-lockfile",
+]
+
+[tasks.start]
+description = "Serves the reader on 127.0.0.1, port FIL_PORT or 3000, and restarts it on changes"
+run = "morbo --listen \"http://127.0.0.1:${FIL_PORT:-3000}\" script/fil.pl"
+
+[tasks.test]
+description = "Runs the unit tests"
+run = "prove -l -r t"
+
+[tasks.test-integration]
+description = "Syncs a test file against the running Miniflux as a throwaway user"
+run = "prove -l -r xt"
+
+[tasks.check]
+description = "Checks formatting, lints the CSS and runs the unit tests"
+run = [{ tasks = ["hooks:check", "perl:fmt", "tooling:fmt", "css:lint"] }, { task = "test" }]
+
+[tasks.fix]
+description = "Formats Perl, Markdown, JSON, YAML, TOML, CSS and JavaScript files"
+run = [
+  "perltidy --profile=.perltidyrc -b -bext=/ $(find lib script t xt .claude/hooks -name '*.p[lm]' -o -name '*.t')",
+  "bunx --bun oxfmt --write .",
+]
+
+[tasks."hooks:install"]
+description = "Installs the Git hooks"
+run = "lefthook install"
+
+[tasks."hooks:check"]
+description = "Validates the Git hook configuration"
+run = "lefthook validate"
+
+[tasks."perl:fmt"]
+description = "Checks Perl formatting"
+run = """
+status=0
+for file in $(find lib script t xt .claude/hooks -name '*.p[lm]' -o -name '*.t'); do
+  perltidy --profile=.perltidyrc --assert-tidy -se -o=/dev/null "$file" || status=1
+done
+exit "$status"
+"""
+
+[tasks."tooling:fmt"]
+description = "Checks Markdown, JSON, YAML, TOML, CSS and JavaScript formatting"
+run = "bunx --bun oxfmt --check ."
+
+[tasks."css:lint"]
+description = "Lints the stylesheets with Stylelint"
+run = "bunx --bun stylelint 'public/**/*.css'"
+
+[tasks."stack:up"]
+description = "Starts Miniflux and PostgreSQL and waits until they are healthy"
+run = "docker compose up --detach --wait"
+
+[tasks."stack:down"]
+description = "Stops Miniflux and PostgreSQL, keeping the database volume"
+run = "docker compose down"
+
+[tasks."stack:logs"]
+description = "Follows the Miniflux logs"
+run = "docker compose logs --follow miniflux"
+
+[tasks."feeds:plan"]
+description = "Shows the changes feeds:apply would make to Miniflux"
+run = "script/fil.pl plan"
+
+[tasks."feeds:apply"]
+description = "Creates, updates and deletes Miniflux feeds and sets the user filters to match the feeds file"
+run = "script/fil.pl apply"

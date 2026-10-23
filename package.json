@@ -1,0 +1,12 @@
+{
+  "name": "fil",
+  "private": true,
+  "dependencies": {
+    "@hotwired/turbo": "8.0.23"
+  },
+  "devDependencies": {
+    "oxfmt": "0.74.0",
+    "stylelint": "17.16.0",
+    "stylelint-config-standard": "40.0.0"
+  }
+}

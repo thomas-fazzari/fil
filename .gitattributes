@@ -1,0 +1,7 @@
+* text=auto eol=lf
+
+*.pl diff=perl
+*.pm diff=perl
+*.t diff=perl
+cpanfile diff=perl
+*.md diff=markdown

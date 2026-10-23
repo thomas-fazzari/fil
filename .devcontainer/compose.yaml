@@ -1,0 +1,27 @@
+# Extends ../compose.yaml, so paths resolve from the repo root
+name: fil-dev
+
+services:
+  dev:
+    build:
+      context: .devcontainer
+    command: sleep infinity
+    volumes:
+      - .:/workspaces/fil:cached
+      # Shebangs and XS modules in local, and Bun binaries in node_modules, are built for Linux
+      - local:/workspaces/fil/local
+      - node-modules:/workspaces/fil/node_modules
+    environment:
+      MINIFLUX_URL: http://miniflux:8080
+      MISE_TRUSTED_CONFIG_PATHS: /workspaces/fil
+    depends_on:
+      miniflux:
+        condition: service_healthy
+
+  miniflux:
+    # Runs next to the host stack, so it publishes no port and keeps its own database
+    ports: !reset []
+
+volumes:
+  local:
+  node-modules:

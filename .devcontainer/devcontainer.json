@@ -1,0 +1,26 @@
+{
+  "name": "fil",
+  "dockerComposeFile": ["../compose.yaml", "compose.yaml"],
+  "service": "dev",
+  "workspaceFolder": "/workspaces/fil",
+  "remoteUser": "vscode",
+  "remoteEnv": {
+    "PATH": "/home/vscode/.local/share/mise/shims:${containerEnv:PATH}"
+  },
+  "forwardPorts": [3000, "miniflux:8080"],
+  "postCreateCommand": "sudo chown vscode:vscode local node_modules && mise install && mise run install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "bscan.perlnavigator",
+        "kraih.mojolicious",
+        "EditorConfig.EditorConfig",
+        "redhat.vscode-yaml",
+        "stylelint.vscode-stylelint",
+        "oxc.oxc-vscode",
+        "tamasfe.even-better-toml",
+        "hverlin.mise-vscode"
+      ]
+    }
+  }
+}

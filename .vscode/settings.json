@@ -1,0 +1,38 @@
+{
+  "perlnavigator.perltidyProfile": "$workspaceFolder/.perltidyrc",
+  "perlnavigator.includePaths": ["$workspaceFolder/lib", "$workspaceFolder/local/lib/perl5"],
+  "oxc.enable.oxlint": false,
+  "oxc.useExecPath": true,
+  "oxc.path.oxfmt": "node_modules/oxfmt/bin/oxfmt",
+  "editor.formatOnSave": true,
+  "css.validate": false,
+  "stylelint.validate": ["css"],
+  "yaml.customTags": ["!reset sequence"],
+  "files.associations": {
+    "bun.lock": "plaintext",
+    "cpanfile": "plaintext",
+    "*.html.ep": "mojolicious"
+  },
+  "files.exclude": {
+    "**/local": true,
+    "**/node_modules": true
+  },
+  "files.watcherExclude": {
+    "**/.git/**": true,
+    "**/local/**": true,
+    "**/node_modules/**": true
+  },
+  "search.exclude": {
+    "**/local/**": true,
+    "**/node_modules/**": true
+  },
+  "[perl]": {
+    "editor.defaultFormatter": "bscan.perlnavigator"
+  },
+  "[markdown][json][jsonc][yaml][toml][css][javascript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[markdown]": {
+    "editor.wordWrap": "on"
+  }
+}

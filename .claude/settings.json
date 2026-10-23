@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": ["Bash(mise run *)", "Bash(prove *)"]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && \"$HOME/.local/share/mise/shims/perl\" .claude/hooks/format.pl"
+          }
+        ]
+      }
+    ]
+  }
+}

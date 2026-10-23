@@ -1,0 +1,66 @@
+% my $current = stash('list') // '';
+% my $theme   = theme;
+<!DOCTYPE html>
+<html lang="en" data-theme="<%= $theme %>">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="<%= $theme %>">
+    <meta name="csp-nonce" content="<%= stash 'csp_nonce' %>">
+    <title><%= title %> · fil</title>
+    <link rel="preload" href="/fonts/onest-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+    %# Back and forward show the cached page at once, then history.js refreshes it in place
+    <meta name="turbo-cache-control" content="no-preview">
+    <meta name="turbo-refresh-method" content="morph">
+    <meta name="turbo-refresh-scroll" content="preserve">
+    %= content 'head'
+    % for my $script (qw(/turbo.es2017-esm.js /js/history.js /js/sidebar.js /js/theme.js /js/search.js)) {
+      %= javascript asset($script), type => 'module', 'data-turbo-track' => 'reload'
+    % }
+    % for my $sheet (qw(layers tokens fonts reset document reader)) {
+      %= stylesheet asset("/css/$sheet.css"), 'data-turbo-track' => 'reload'
+    % }
+  </head>
+  <body>
+    % my $hidden   = sidebar_hidden;
+    % my $filtered = grep { defined id_param $_ } qw(category feed);
+    % my $funnel   = 'icon-button' . ($filtered ? ' icon-button--active' : '');
+    <div class="layout<%= $hidden ? ' layout--collapsed' : '' %>">
+      <div class="layout__main">
+        <header class="masthead">
+          <form class="masthead__toggle" method="post" action="<%= url_for 'toggle_sidebar' %>">
+            <button class="<%= $funnel %>" title="Filters" aria-label="Filters" aria-expanded="<%= $hidden ? 'false' : 'true' %>"><%= icon 'funnel' %></button>
+          </form>
+          <button class="<%= $funnel %> masthead__drawer" popovertarget="drawer" title="Filters" aria-label="Filters"><%= icon 'funnel' %></button>
+          <div class="history" role="group" aria-label="History">
+            <button type="button" class="icon-button" data-history="back" title="Back" aria-label="Back"><%= icon 'chevron-left' %></button>
+            <button type="button" class="icon-button" data-history="forward" title="Forward" aria-label="Forward"><%= icon 'chevron-right' %></button>
+          </div>
+          %= include 'tabs', current => $current
+          <form class="search" role="search" action="<%= url_for $current || 'all' %>">
+            % for my $name (qw(category feed)) {
+              % if (defined(my $value = id_param $name)) {
+                %= hidden_field $name => $value
+              % }
+            % }
+            %= search_field 'q', class => 'search__input', autocomplete => 'off', placeholder => 'Search', 'aria-label' => 'Search', 'aria-keyshortcuts' => '/ Meta+K Control+K'
+            % my $mac = ($c->req->headers->user_agent // '') =~ /Macintosh/;
+            <kbd class="search__shortcut" aria-hidden="true"><%= $mac ? '⌘K' : 'Ctrl K' %></kbd>
+          </form>
+          <span class="masthead__divider" aria-hidden="true"></span>
+          <form method="post" action="<%= url_for 'toggle_theme' %>" data-turbo="false" data-theme-toggle>
+            <button class="icon-button" title="Toggle theme" aria-label="Toggle theme"><%= icon 'contrast' %></button>
+          </form>
+        </header>
+        <main><%= content %></main>
+      </div>
+      % unless ($hidden) {
+        <aside class="sidebar"><%= include 'sidebar', current => $current %></aside>
+      % }
+    </div>
+    <aside id="drawer" class="drawer" popover>
+      <button class="icon-button drawer__close" popovertarget="drawer" popovertargetaction="hide" title="Close" aria-label="Close"><%= icon 'x' %></button>
+      %= include 'sidebar', current => $current
+    </aside>
+  </body>
+</html>

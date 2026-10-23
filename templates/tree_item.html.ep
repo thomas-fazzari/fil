@@ -1,0 +1,12 @@
+% if ($on) {
+  <a class="tree__item" href="<%= url_for $list %>" aria-current="true" title="Clear the filter">
+    <%= $item->{title} %><span class="tree__count"><%= icon 'x' %></span>
+  </a>
+% } else {
+  <a class="tree__item" href="<%= url_for($list)->query($key => $item->{id}) %>">
+    <%= $item->{title} %>
+    % if ($item->{unread}) {
+      <span class="tree__count"><%= $item->{unread} %></span>
+    % }
+  </a>
+% }

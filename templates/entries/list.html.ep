@@ -1,0 +1,24 @@
+% layout 'default';
+% title $title;
+
+% if (@$groups) {
+  % for my $group (@$groups) {
+    <section class="month">
+      <h2 class="month__title"><%= $group->{label} %></h2>
+      <ol class="entries">
+        % for my $entry ($group->{entries}->@*) {
+          <li class="entries__item<%= $entry->{status} eq 'read' ? ' entries__item--read' : '' %>">
+            <span class="entries__day"><%= $entry->{day} %></span>
+            <div>
+              %# Opening an entry marks it read, hovering must not prefetch it
+              <a class="entries__title" href="<%= url_with(entry => id => $entry->{id})->query({q => undef}) %>" data-turbo-prefetch="false"><%= $entry->{title} %></a>
+              <a class="entries__source" href="<%= url_with->query({feed => $entry->{feed}{id}, category => undef, q => undef}) %>"><%= $entry->{feed}{title} %></a>
+            </div>
+          </li>
+        % }
+      </ol>
+    </section>
+  % }
+% } else {
+  <p class="empty"><%= $empty %></p>
+% }

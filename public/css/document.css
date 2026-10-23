@@ -1,0 +1,57 @@
+@layer base {
+  :root {
+    color-scheme: dark;
+    scrollbar-color: var(--color-scrollbar) transparent;
+  }
+
+  * {
+    scrollbar-width: thin;
+  }
+
+  :root[data-theme="light"] {
+    color-scheme: light;
+  }
+
+  body {
+    padding-block: var(--space-8);
+    padding-inline: var(--space-4);
+    color: var(--color-text);
+    background: var(--color-background);
+    font-family: var(--font-ui);
+    font-size: var(--text-body);
+    font-synthesis: none;
+    line-height: var(--line-height-ui);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    color: inherit;
+    font: inherit;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    line-height: var(--line-height-heading);
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    color: var(--color-text-strong);
+    background: var(--color-selected);
+  }
+
+  :focus-visible {
+    outline: var(--focus-width) solid var(--color-focus);
+    outline-offset: var(--focus-width);
+  }
+}

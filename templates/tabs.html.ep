@@ -1,0 +1,6 @@
+<nav class="tabs" aria-label="Lists">
+  % for my $tab ([unread => 'Unread', 'inbox'], [all => 'All', 'list'], [bookmarks => 'Bookmarks', 'bookmark']) {
+    % my ($name, $label, $icon) = @$tab;
+    <a class="tabs__tab" href="<%= url_with($name)->query({q => undef}) %>"<%== $name eq $current ? ' aria-current="page"' : '' %>><%= icon $icon %><span class="tabs__label"><%= $label %></span></a>
+  % }
+</nav>
