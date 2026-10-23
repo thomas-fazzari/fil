@@ -4,6 +4,7 @@ use Mojo::Base 'Mojolicious', -signatures;
 use Fil::Miniflux;
 use Fil::Sidebar qw(sidebar);
 use Mojo::ByteStream;
+use Mojo::URL;
 use Mojo::Util qw(generate_secret trim);
 
 has miniflux => sub { Fil::Miniflux->new };
@@ -67,9 +68,22 @@ sub startup ($self) {
   $r->get('/bookmarks')->to('entries#list', list => 'bookmarks')->name('bookmarks');
   $r->get('/entries/<id:num>')->to('entries#show')->name('entry');
   $r->get('/entries/<id:num>/markdown')->to('entries#export')->name('export');
-  $r->post('/entries/<id:num>/bookmark')->to('entries#bookmark')->name('bookmark');
-  $r->post('/sidebar')->to('preferences#toggle_sidebar')->name('toggle_sidebar');
-  $r->post('/theme')->to('preferences#toggle_theme')->name('toggle_theme');
+
+  my $same_origin = $r->under(sub ($c) {
+    my $headers = $c->req->headers;
+    my $site    = $headers->header('Sec-Fetch-Site');
+    my $origin  = $headers->origin;
+    my $allowed
+      = defined $site   ? $site eq 'same-origin' || $site eq 'none'
+      : defined $origin ? (Mojo::URL->new($origin)->host_port // '') eq ($c->req->url->to_abs->host_port // '')
+      :                   1;
+    return 1 if $allowed;
+    $c->render(text => 'Cross-site request', status => 403);
+    return undef;
+  });
+  $same_origin->post('/entries/<id:num>/bookmark')->to('entries#bookmark')->name('bookmark');
+  $same_origin->post('/sidebar')->to('preferences#toggle_sidebar')->name('toggle_sidebar');
+  $same_origin->post('/theme')->to('preferences#toggle_theme')->name('toggle_theme');
 }
 
 1;

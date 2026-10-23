@@ -3,9 +3,12 @@ document.addEventListener("click", (event) => {
   if (!button) {
     return;
   }
+  const site = window.navigation;
   if (button.dataset.history === "back") {
-    history.back();
-  } else {
+    if (!site || site.canGoBack) {
+      history.back();
+    }
+  } else if (!site || site.canGoForward) {
     history.forward();
   }
 });

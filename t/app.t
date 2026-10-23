@@ -229,6 +229,23 @@ subtest 'Bookmark' => sub {
   is_deeply \@bookmarked, [7], 'toggled';
 };
 
+subtest 'Cross-site requests' => sub {
+  my $origin = 'http://' . $t->ua->server->url->host_port;
+  for my $path ('/entries/7/bookmark', '/sidebar', '/theme') {
+    $t->post_ok($path => {'Sec-Fetch-Site' => 'cross-site'})->status_is(403);
+    $t->post_ok($path => {'Sec-Fetch-Site' => 'same-site'})->status_is(403);
+    $t->post_ok($path => {Origin           => 'https://elsewhere.example'})->status_is(403);
+    $t->post_ok($path => {Origin           => 'null'})->status_is(403);
+  }
+  is_deeply \@bookmarked, [7], 'not toggled';
+  $t->get_ok('/')->element_exists('.sidebar')->element_exists('html[data-theme="dark"]');
+
+  $t->post_ok('/entries/7/bookmark' => {'Sec-Fetch-Site' => 'same-origin'})->status_is(303);
+  $t->post_ok('/entries/7/bookmark' => {'Sec-Fetch-Site' => 'none'})->status_is(303);
+  $t->post_ok('/entries/7/bookmark' => {Origin           => $origin})->status_is(303);
+  is scalar @bookmarked, 4, 'same origin toggles';
+};
+
 subtest 'Filter context follows the entry' => sub {
   $t->get_ok('/?feed=5')->element_exists('.entries__title[href="/entries/7?feed=5"]');
   $t->get_ok('/entries/7?feed=5')

@@ -95,6 +95,7 @@ package FakeMiniflux {
 
   has calls      => sub { [] };
   has bookmarked => 0;
+  has failing    => '';
 
   sub categories ($self) { [{id => 1, title => 'blogs'}] }
 
@@ -104,6 +105,7 @@ package FakeMiniflux {
   }
 
   sub create_feed ($self, $feed) {
+    die "unreachable\n" if $feed->{feed_url} eq $self->failing;
     push $self->calls->@*, ['create_feed', $feed];
     return {feed_id => 4};
   }
@@ -126,7 +128,8 @@ subtest 'Apply' => sub {
         category => 'rust',
         settings => {crawler => true, title => 'A'}
       },
-      {action => 'update', id => 5, url => 'https://b.example/feed', diff => {category => ['rust', 'Blogs']}},
+      {action => 'update', id => 5, url => 'https://b.example/feed', diff => {category => ['rust',  'Blogs']}},
+      {action => 'update', id => 7, url => 'https://d.example/feed', diff => {category => ['blogs', 'Rust']}},
       {action => 'delete', id => 6, url => 'https://c.example/feed'},
     ]
   );
@@ -139,9 +142,21 @@ subtest 'Apply' => sub {
     ['create_feed',     {feed_url => 'https://a.example/feed', category_id => 2, crawler => true}],
     ['update_feed',     4, {feed_url    => 'https://a.example/feed', title => 'A'}],
     ['update_feed',     5, {category_id => 1}],
+    ['update_feed',     7, {category_id => 2}],
     ['delete_feed',     6],
     ],
     'missing category created once, title set after create';
+
+  $miniflux = FakeMiniflux->new(failing => 'https://a.example/feed');
+  $failures = apply_changes(
+    $miniflux,
+    [
+      {action => 'create', url => 'https://a.example/feed', category => 'blogs', settings => {}},
+      {action => 'delete', id  => 6, url => 'https://c.example/feed'},
+    ]
+  );
+  is_deeply $failures,        ["create https://a.example/feed: unreachable\n"], 'API error reported';
+  is_deeply $miniflux->calls, [['delete_feed', 6]],                             'next change still applied';
 
   $miniflux = FakeMiniflux->new(bookmarked => 1);
   $failures = apply_changes($miniflux, [{action => 'delete', id => 6, url => 'https://c.example/feed'}]);
