@@ -72,6 +72,7 @@ sub show ($self) {
   my $content = _without_title($entry, $entry->{content});
   if ($unread && _empty($content)) {
     my $fetched = eval { $miniflux->fetch_content($entry->{id}) };
+    $self->log->warn($@ =~ s/\n\z//r)           if $@;
     $content = _without_title($entry, $fetched) if defined $fetched;
   }
 

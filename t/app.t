@@ -191,10 +191,15 @@ subtest 'Entries without text' => sub {
   $t->get_ok('/entries/8')->status_is(200)->text_is('.entry__content > p' => 'The text of the linked page.');
   is_deeply \@fetched, ['true'], 'fetched once and kept by Miniflux';
 
-  $t->get_ok('/entries/9')
-    ->status_is(200)
-    ->element_exists_not('.entry__content')
-    ->element_exists('.empty a[href="https://example.com/hello"]');
+  {
+    my $logs = $t->app->log->capture('warn');
+    $t->get_ok('/entries/9')
+      ->status_is(200)
+      ->element_exists_not('.entry__content')
+      ->element_exists('.empty a[href="https://example.com/hello"]');
+    like $logs, qr{\[warn\] .*Miniflux: GET /v1/entries/9/fetch-content\S* failed with 500 unreachable},
+      'failure logged';
+  }
 
   $t->get_ok('/entries/10')->text_is('.entry__content > p' => 'The text of the linked page.');
   is_deeply \@fetched, ['true', 'true'], 'fetched once the title is left out';

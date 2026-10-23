@@ -49,7 +49,7 @@ sub startup ($self) {
     }
   );
 
-# Miniflux serves http images from its own origin. The nonce covers the <style> of Turbo's progress bar
+  # Miniflux serves http images from its own origin. The nonce covers the <style> of Turbo's progress bar
   $self->hook(
     before_dispatch => sub ($c) {
       my $nonce    = substr generate_secret(), 0, 32;

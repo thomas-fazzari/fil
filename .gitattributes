@@ -5,3 +5,6 @@
 *.t diff=perl
 cpanfile diff=perl
 *.md diff=markdown
+
+# GitHub has no Mojolicious template grammar, ERB shares its <% %> tags
+*.html.ep linguist-language=HTML+ERB
